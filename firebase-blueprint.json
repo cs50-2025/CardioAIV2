@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Doctor profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" }
+      },
+      "required": ["uid", "email", "name"]
+    },
+    "Patient": {
+      "title": "Patient",
+      "description": "Patient profile created by doctor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "doctorUid": { "type": "string" },
+        "name": { "type": "string" },
+        "age": { "type": "number" },
+        "loginCode": { "type": "string" },
+        "bpm": { "type": "number" },
+        "bloodSugar": { "type": "number" },
+        "spO2": { "type": "number" },
+        "fitnessLevel": { "type": "string", "enum": ["Beginner", "Intermediate", "Advanced"] }
+      },
+      "required": ["id", "doctorUid", "name", "loginCode", "fitnessLevel"]
+    },
+    "Medication": {
+      "title": "Medication",
+      "description": "Medication schedule for a patient",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "doctorUid": { "type": "string" },
+        "name": { "type": "string" },
+        "dosageTimes": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "patientId", "doctorUid", "name", "dosageTimes"]
+    },
+    "VideoSubmission": {
+      "title": "VideoSubmission",
+      "description": "Video proof uploaded by patient",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "doctorUid": { "type": "string" },
+        "type": { "type": "string", "enum": ["medication", "fitness"] },
+        "videoUrl": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "aiValidationResult": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed"] }
+      },
+      "required": ["id", "patientId", "doctorUid", "type", "videoUrl", "timestamp", "status"]
+    },
+    "FitnessPlan": {
+      "title": "FitnessPlan",
+      "description": "AI generated fitness plan for patient",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "patientId": { "type": "string" },
+        "exercises": { "type": "array", "items": { "type": "object" } },
+        "generatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "patientId", "exercises", "generatedAt"]
+    }
+  },
+  "firestore": {
+    "/doctors/{doctorId}": {
+      "schema": { "$ref": "#/entities/Doctor" },
+      "description": "Doctor profiles"
+    },
+    "/patients/{patientId}": {
+      "schema": { "$ref": "#/entities/Patient" },
+      "description": "Patient profiles"
+    },
+    "/medications/{medicationId}": {
+      "schema": { "$ref": "#/entities/Medication" },
+      "description": "Medication schedules"
+    },
+    "/videoSubmissions/{submissionId}": {
+      "schema": { "$ref": "#/entities/VideoSubmission" },
+      "description": "Video submissions"
+    },
+    "/fitnessPlans/{planId}": {
+      "schema": { "$ref": "#/entities/FitnessPlan" },
+      "description": "Fitness plans"
+    }
+  }
+}

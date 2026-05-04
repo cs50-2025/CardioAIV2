@@ -1,0 +1,6 @@
+{
+  "name": "Cardio AI",
+  "description": "Dual Portal Healthcare System (Doctor + Patient) with AI-powered fitness and medication monitoring.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": []
+}
