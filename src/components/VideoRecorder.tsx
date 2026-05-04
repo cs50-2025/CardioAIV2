@@ -10,14 +10,21 @@ interface VideoRecorderProps {
   patientData: any;
   type: 'fitness' | 'medication' | 'meditation';
   onSuccess?: () => void;
+  onRecordingChange?: (isRecording: boolean) => void;
   title: string;
   description: string;
 }
 
-export function VideoRecorder({ patientData, type, onSuccess, title, description }: VideoRecorderProps) {
+export function VideoRecorder({ patientData, type, onSuccess, onRecordingChange, title, description }: VideoRecorderProps) {
   const webcamRef = useRef<Webcam>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+
+  useEffect(() => {
+    if (onRecordingChange) {
+      onRecordingChange(isRecording);
+    }
+  }, [isRecording, onRecordingChange]);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);

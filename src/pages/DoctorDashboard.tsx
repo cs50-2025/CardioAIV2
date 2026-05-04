@@ -411,112 +411,6 @@ function HomeTab({ doctorUser, patients, notifications, unreadMessagesCount }: a
 
 // 2. PATIENTS TAB
 
-function AIHealthTrendAnalysis({ patient }: { patient: any }) {
-  const [analysis, setAnalysis] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    setAnalysis('');
-    setError('');
-  }, [patient.id]);
-
-  const analyzeTrends = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("Gemini API Key is not configured.");
-      }
-      const ai = new GoogleGenAI({ apiKey });
-
-      // Generate realistic mock historical data to show trends
-      const baseBpm = patient.bpm || 80;
-      const baseSugar = patient.bloodSugar || 90;
-      const baseSpO2 = patient.spO2 || 98;
-      
-      const mockHistory = [
-        { period: '4 weeks ago', bpm: baseBpm - Math.floor(Math.random() * 5 + 5), bloodSugar: baseSugar - Math.floor(Math.random() * 4 + 2), spO2: baseSpO2 + 1 },
-        { period: '3 weeks ago', bpm: baseBpm - Math.floor(Math.random() * 4 + 2), bloodSugar: baseSugar - Math.floor(Math.random() * 3 + 1), spO2: baseSpO2 },
-        { period: '2 weeks ago', bpm: baseBpm - Math.floor(Math.random() * 2), bloodSugar: baseSugar + Math.floor(Math.random() * 2), spO2: baseSpO2 - 1 },
-        { period: '1 week ago', bpm: baseBpm + Math.floor(Math.random() * 2 + 1), bloodSugar: baseSugar + Math.floor(Math.random() * 3 + 1), spO2: baseSpO2 },
-        { period: 'Current', bpm: baseBpm, bloodSugar: baseSugar, spO2: baseSpO2 },
-      ];
-
-      const prompt = `Analyze the following historical health data for patient ${patient.name}.
-
-Data (last 4 weeks):
-${JSON.stringify(mockHistory, null, 2)}
-
-Identify any significant trends, anomalies, or potential health risks. Present these insights directly to the doctor in a concise, professional medical tone. Highlighting things like "Patient's BPM has been steadily increasing" or "SpO2 levels dropped slightly". Please provide a maximum of 3 bullet points. Do not include introductory text, start straight with the bullet points.`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: prompt,
-        config: {
-          temperature: 0.2
-        }
-      });
-
-      setAnalysis(response.text || "Unable to generate analysis.");
-    } catch (err: any) {
-      setError(err.message || "An error occurred during analysis.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Card className="dark:bg-slate-900 border-none shadow-sm ring-1 ring-slate-100 dark:ring-slate-800 mt-6">
-      <CardHeader className="bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-slate-800/50 dark:to-slate-900/50 pb-4 border-b border-slate-100 dark:border-slate-800 rounded-t-xl">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Bot className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-          AI Health Trend Analysis
-        </CardTitle>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Analyze {patient.name}'s historical vitals using Gemini 3.1 Pro to identify trends and risks.
-        </p>
-      </CardHeader>
-      <CardContent className="pt-6">
-        {analysis ? (
-          <div className="space-y-4">
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-               {analysis.split('\n').map((line, i) => (
-                  <p key={i} className="mb-2 text-slate-700 dark:text-slate-300">
-                     {line}
-                  </p>
-               ))}
-            </div>
-            <Button variant="outline" size="sm" onClick={analyzeTrends} disabled={loading} className="w-full sm:w-auto">
-               <Activity className="w-4 h-4 mr-2" />
-               {loading ? 'Re-analyzing...' : 'Refresh Analysis'}
-            </Button>
-          </div>
-        ) : error ? (
-          <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg text-sm mb-4">
-            {error}
-            <Button variant="outline" size="sm" onClick={analyzeTrends} className="mt-2 w-full dark:border-red-800 dark:text-red-300">
-               Retry
-            </Button>
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <Bot className="w-10 h-10 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-              Click below to generate a comprehensive trend analysis based on the patient's recent vitals.
-            </p>
-            <Button onClick={analyzeTrends} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white">
-              <Activity className="w-4 h-4 mr-2" />
-              {loading ? 'Analyzing Trends...' : 'Generate AI Analysis'}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 function PatientsTab({ doctorUser, patients, selectedPatient, setSelectedPatient, medications, videos }: any) {
   const [isAddPatientOpen, setIsAddPatientOpen] = useState(false);
   const [newPatient, setNewPatient] = useState({ name: '', age: '', bpm: '', bloodSugar: '', spO2: '', fitnessLevel: 'Beginner', needsMeditation: false });
@@ -630,8 +524,6 @@ function PatientsTab({ doctorUser, patients, selectedPatient, setSelectedPatient
               <Card className="dark:bg-slate-900 border-none shadow-sm ring-1 ring-slate-100 dark:ring-slate-800"><CardHeader className="pb-2"><CardTitle className="text-sm text-blue-500 dark:text-purple-400 flex items-center gap-2">Blood Sugar</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{selectedPatient.bloodSugar || '--'}</div></CardContent></Card>
               <Card className="dark:bg-slate-900 border-none shadow-sm ring-1 ring-slate-100 dark:ring-slate-800"><CardHeader className="pb-2"><CardTitle className="text-sm text-emerald-500 flex items-center gap-2">SpO2</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{selectedPatient.spO2 ? `${selectedPatient.spO2}%` : '--'}</div></CardContent></Card>
             </div>
-
-            <AIHealthTrendAnalysis patient={selectedPatient} />
 
             <Tabs defaultValue="medications" className="w-full">
               <TabsList className="grid w-full grid-cols-2 bg-slate-200/50 dark:bg-slate-800 p-1">

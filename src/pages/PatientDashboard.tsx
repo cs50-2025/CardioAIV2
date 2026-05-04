@@ -593,6 +593,24 @@ function FitnessTab({ patientData, fitnessPlan }: any) {
 
 function MeditationTab({ patientData }: any) {
   const [isBreathing, setIsBreathing] = useState(false);
+  const [breathStage, setBreathStage] = useState<'Inhale' | 'Hold' | 'Exhale'>('Inhale');
+
+  useEffect(() => {
+    let interval: any;
+    if (isBreathing) {
+      setBreathStage('Inhale');
+      interval = setInterval(() => {
+        setBreathStage(current => {
+          if (current === 'Inhale') return 'Hold';
+          if (current === 'Hold') return 'Exhale';
+          return 'Inhale';
+        });
+      }, 4000); // 4 seconds per stage
+    } else {
+      setBreathStage('Inhale');
+    }
+    return () => clearInterval(interval);
+  }, [isBreathing]);
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -603,28 +621,32 @@ function MeditationTab({ patientData }: any) {
              </CardHeader>
              <CardContent className="flex flex-col items-center justify-center py-12">
                <motion.div
-                 className="w-48 h-48 bg-teal-200 dark:bg-teal-900/50 rounded-full flex items-center justify-center mb-8 shadow-inner"
+                 className="w-56 h-56 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-8 shadow-inner border-4 border-emerald-50 dark:border-emerald-800/50"
                  animate={isBreathing ? {
-                   scale: [1, 1.5, 1],
+                   scale: [1, 1.5, 1.5, 1],
                  } : { scale: 1 }}
                  transition={isBreathing ? {
-                   duration: 8,
+                   duration: 12,
                    repeat: Infinity,
+                   times: [0, 0.33, 0.66, 1],
                    ease: "easeInOut"
                  } : {}}
                >
-                 <motion.div
-                   className="w-24 h-24 bg-teal-400 dark:bg-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg"
-                 >
-                   Breathe
-                 </motion.div>
+                 <div className="flex flex-col items-center text-emerald-600 dark:text-emerald-400">
+                    <motion.div
+                      className="w-28 h-28 bg-emerald-500 dark:bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg mb-2"
+                      animate={isBreathing ? {
+                        opacity: [0.8, 1, 1, 0.8],
+                      } : { opacity: 1 }}
+                    >
+                      {isBreathing ? breathStage : 'Ready'}
+                    </motion.div>
+                    {!isBreathing && <span className="text-sm font-medium animate-pulse">Start recording to begin</span>}
+                 </div>
                </motion.div>
                
-               <Button onClick={() => setIsBreathing(!isBreathing)} size="lg" className={`${isBreathing ? 'bg-red-500 hover:bg-red-600' : 'bg-teal-500 hover:bg-teal-600'} text-white rounded-full px-8`}>
-                 {isBreathing ? 'Stop Session' : 'Start Breathing'}
-               </Button>
                <p className="mt-4 text-slate-500 dark:text-slate-400 text-center max-w-md">
-                 Follow the expanding and contracting circle. Inhale as it grows, exhale as it shrinks.
+                 Follow the expanding and contracting circle. Inhale as it grows, hold at the top, and exhale as it shrinks.
                </p>
              </CardContent>
           </Card>
@@ -639,6 +661,7 @@ function MeditationTab({ patientData }: any) {
                 type="meditation" 
                 title="" 
                 description="Record your meditation session for your doctor." 
+                onRecordingChange={setIsBreathing}
               />
             </CardContent>
           </Card>
